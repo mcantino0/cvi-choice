@@ -243,6 +243,11 @@
             }
         });
 
+        titleImg.addEventListener('click', (e) => {
+            e.preventDefault();
+            showScreen('screen-1');
+        });
+
         // Set up choice buttons for each screen
         const screenChoices = [
             { screenId: 'screen-1', nextScreen: 'screen-2' },
