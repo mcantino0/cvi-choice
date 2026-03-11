@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Choice Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffff00;
+        }
+
+        .builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #444;
+        }
+
+        h2 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        input[type="file"]::file-selector-button {
+            background-color: #ffff00;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #e6e600;
+        }
+
+        button {
+            background-color: #ffff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e6e600;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            background-color: #444;
+            border: 2px dashed #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .choice-item {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+        }
+
+        .choice-item h3 {
+            color: #ffff00;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .remove-btn {
+            background-color: #ff6b6b;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .remove-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .title-section {
+            grid-column: 1 / -1;
+        }
+
+        .choices-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .download-btn {
+            background-color: #00d084;
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .download-btn:hover {
+            background-color: #00b872;
+        }
+
+        .button-group button:not(.download-btn) {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .builder {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .warning {
+            background-color: #662d2d;
+            border: 1px solid #ff6b6b;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Interactive Choice Builder</h1>
+        
+        <div class="builder">
+            <!-- Title Section -->
+            <div class="section title-section">
+                <h2>Title Screen</h2>
+                <div class="form-group">
+                    <label for="title-image">Upload Title Image:</label>
+                    <input type="file" id="title-image" accept="image/*">
+                    <div class="image-preview" id="title-preview">No image</div>
+                    <p class="help-text">This is the first screen users see</p>
+                </div>
+            </div>
+
+            <!-- Choices Section -->
+            <div class="section">
+                <h2>Choice 1</h2>
+                <div class="form-group">
+                    <label for="choice1-image">Upload Image:</label>
+                    <input type="file" id="choice1-image" accept="image/*">
+                    <div class="image-preview" id="choice1-preview">No image</div>
+                </div>
+                <div class="form-group">
+                    <label for="choice1-youtube">YouTube Video ID:</label>
+                    <input type="text" id="choice1-youtube" placeholder="e.g., dQw4w9WgXcQ">
+                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Choice 2</h2>
+                <div class="form-group">
+                    <label for="choice2-image">Upload Image:</label>
+                    <input type="file" id="choice2-image" accept="image/*">
+                    <div class="image-preview" id="choice2-preview">No image</div>
+                </div>
+                <div class="form-group">
+                    <label for="choice2-youtube">YouTube Video ID:</label>
+                    <input type="text" id="choice2-youtube" placeholder="e.g., dQw4w9WgXcQ">
+                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Choice 3</h2>
+                <div class="form-group">
+                    <label for="choice3-image">Upload Image:</label>
+                    <input type="file" id="choice3-image" accept="image/*">
+                    <div class="image-preview" id="choice3-preview">No image</div>
+                </div>
+                <div class="form-group">
+                    <label for="choice3-youtube">YouTube Video ID:</label>
+                    <input type="text" id="choice3-youtube" placeholder="e.g., dQw4w9WgXcQ">
+                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Choice 4</h2>
+                <div class="form-group">
+                    <label for="choice4-image">Upload Image:</label>
+                    <input type="file" id="choice4-image" accept="image/*">
+                    <div class="image-preview" id="choice4-preview">No image</div>
+                </div>
+                <div class="form-group">
+                    <label for="choice4-youtube">YouTube Video ID:</label>
+                    <input type="text" id="choice4-youtube" placeholder="e.g., dQw4w9WgXcQ">
+                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="download-btn" onclick="downloadHTML()">📥 Download HTML File</button>
+                <button onclick="previewApp()">👁️ Preview App</button>
+                <button onclick="resetForm()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Image preview functionality
+        function setupImagePreview(inputId, previewId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById(previewId);
+                        preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                        // Store the data URL for later use
+                        window[inputId + '_dataUrl'] = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Setup all image previews
+        setupImagePreview('title-image', 'title-preview');
+        setupImagePreview('choice1-image', 'choice1-preview');
+        setupImagePreview('choice2-image', 'choice2-preview');
+        setupImagePreview('choice3-image', 'choice3-preview');
+        setupImagePreview('choice4-image', 'choice4-preview');
+
+        function getVideoId(input) {
+            return document.getElementById(input).value.trim();
+        }
+
+        function getImageDataUrl(input) {
+            return window[input + '_dataUrl'] || '';
+        }
+
+        function downloadHTML() {
+            // Validate inputs
+            if (!getImageDataUrl('title-image')) {
+                alert('Please upload a title image');
+                return;
+            }
+
+            const choiceCount = ['choice1-image', 'choice2-image', 'choice3-image', 'choice4-image']
+                .filter(id => getImageDataUrl(id)).length;
+            
+            if (choiceCount === 0) {
+                alert('Please upload at least one choice image');
+                return;
+            }
+
+            const youtubeCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
+                .filter(id => getVideoId(id)).length;
+            
+            if (youtubeCount === 0) {
+                alert('Please enter at least one YouTube video ID');
+                return;
+            }
+
+            // Generate HTML
+            const htmlContent = generateHTML();
+
+            // Download file
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'interactive-choice-app.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ HTML file downloaded! All images and videos are embedded, so it works offline.');
+        }
+
+        function generateHTML() {
+            const titleImg = getImageDataUrl('title-image');
+            const choices = [
+                { img: getImageDataUrl('choice1-image'), id: getVideoId('choice1-youtube') },
+                { img: getImageDataUrl('choice2-image'), id: getVideoId('choice2-youtube') },
+                { img: getImageDataUrl('choice3-image'), id: getVideoId('choice3-youtube') },
+                { img: getImageDataUrl('choice4-image'), id: getVideoId('choice4-youtube') }
+            ].filter(choice => choice.img); // Only include choices with images
+
+            let choiceScreensHTML = '';
+            let screenChoicesJS = [];
+
+            choices.forEach((choice, index) => {
+                const screenId = `screen-${index + 1}`;
+                const nextScreen = index < choices.length - 1 ? `screen-${index + 2}` : 'title';
+
+                choiceScreensHTML += `
+    <!-- Screen ${index + 1}: Picture${index + 1} or Next -->
+    <div class="screen choices-screen" id="${screenId}">
+        <button class="choice-button" aria-label="Picture ${index + 1} - Opens YouTube video">
+            <img src="${choice.img}" alt="Picture ${index + 1}">
+        </button>
+        <button class="choice-button next-button" aria-label="Next - Go to next set of options">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='30,20 70,50 30,80' fill='%23ffff00'/%3E%3C/svg%3E" alt="Next">
+        </button>
+    </div>`;
+
+                screenChoicesJS.push({
+                    screenId,
+                    nextScreen,
+                    youtubeId: choice.id
+                });
+            });
+
+            const screenChoicesArray = JSON.stringify(screenChoicesJS);
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Choice App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none !important;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .screen.active {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .title-screen {
+            text-align: center;
+        }
+
+        .title-screen img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .title-screen img:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .choices-screen {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .screen.active.choices-screen {
+            flex-direction: row;
+        }
+
+        .choice-button {
+            background: none;
+            border: 3px solid transparent;
+            cursor: pointer;
+            padding: 10px;
+            transition: all 0.2s;
+        }
+
+        .choice-button img {
+            max-width: 300px;
+            height: auto;
+            display: block;
+        }
+
+        .choice-button:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .choice-button:active {
+            transform: scale(0.95);
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 0, 0.3);
+            color: #ffff00;
+            border: 2px solid #ffff00;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .back-button:focus {
+            outline: none;
+            background-color: #ffff00;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Screen -->
+    <div class="screen title-screen active" id="screen-title">
+        <img src="${titleImg}" alt="Title - Press Enter to continue" tabindex="0">
+    </div>
+
+${choiceScreensHTML}
+
+    <!-- Video Player Screen -->
+    <div class="screen" id="screen-video">
+        <button class="back-button" aria-label="Close video and go back">Close Video (Esc)</button>
+        <div class="video-container" id="video-container">
+            <div id="video-player"></div>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"><\/script>
+    <script>
+        let currentScreen = 'title';
+        let previousScreen = 'screen-1';
+        let youtubePlayer = null;
+        let playerReady = false;
+        const screens = {
+            'title': document.getElementById('screen-title'),
+            'screen-1': document.getElementById('screen-1'),
+            'screen-2': document.getElementById('screen-2'),
+            'screen-3': document.getElementById('screen-3'),
+            'screen-4': document.getElementById('screen-4'),
+            'screen-5': document.getElementById('screen-5'),
+            'video': document.getElementById('screen-video')
+        };
+
+        const screenChoices = ${screenChoicesArray};
+
+        function initializeYouTubePlayer() {
+            if (typeof YT !== 'undefined' && YT.Player && !playerReady) {
+                youtubePlayer = new YT.Player('video-player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: 'O610FzBWs5A',
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    },
+                    playerVars: {
+                        'autoplay': 1,
+                        'fs': 1,
+                        'modestbranding': 1
+                    }
+                });
+                playerReady = true;
+            }
+        }
+
+        window.onYouTubeIframeAPIReady = function() {
+            initializeYouTubePlayer();
+        };
+
+        window.addEventListener('load', function() {
+            setTimeout(initializeYouTubePlayer, 500);
+        });
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                showScreen('title');
+            }
+        }
+
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => {
+                if (screen) screen.classList.remove('active');
+            });
+            if (screens[screenName]) {
+                screens[screenName].classList.add('active');
+            }
+            
+            if (screenName === 'video') {
+                previousScreen = currentScreen;
+            }
+            
+            currentScreen = screenName;
+            
+            setTimeout(() => {
+                const screen = screens[screenName];
+                if (screen) {
+                    const focusableElements = screen.querySelectorAll('button, img[tabindex], [tabindex="0"]');
+                    if (focusableElements.length > 0) {
+                        focusableElements[0].focus();
+                    }
+                }
+            }, 100);
+        }
+
+        const titleImg = document.querySelector('#screen-title img');
+        titleImg.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                showScreen('screen-1');
+            }
+        });
+
+        titleImg.addEventListener('click', (e) => {
+            e.preventDefault();
+            showScreen('screen-1');
+        });
+
+        screenChoices.forEach(({ screenId, nextScreen, youtubeId }) => {
+            const screen = document.getElementById(screenId);
+            if (!screen) return;
+            
+            const buttons = screen.querySelectorAll('.choice-button');
+            
+            buttons.forEach((button, index) => {
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (button.classList.contains('next-button')) {
+                            showScreen(nextScreen);
+                        } else {
+                            showScreen('video');
+                        }
+                    }
+                });
+
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (button.classList.contains('next-button')) {
+                        showScreen(nextScreen);
+                    } else {
+                        showScreen('video');
+                    }
+                });
+            });
+        });
+
+        const backButton = document.querySelector('.back-button');
+        backButton.addEventListener('click', () => {
+            showScreen(previousScreen);
+        });
+
+        backButton.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                showScreen(previousScreen);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentScreen === 'video') {
+                showScreen(previousScreen);
+            }
+        });
+
+        const originalShowScreen = showScreen;
+        showScreen = function(screenName) {
+            originalShowScreen(screenName);
+            
+            if (screenName === 'video') {
+                const choiceData = screenChoices.find(c => previousScreen && previousScreen.includes(c.screenId.split('-')[1]));
+                const videoId = choiceData ? choiceData.youtubeId : 'O610FzBWs5A';
+                
+                if (youtubePlayer && playerReady) {
+                    youtubePlayer.loadVideoById(videoId);
+                    youtubePlayer.playVideo();
+                } else {
+                    initializeYouTubePlayer();
+                    if (youtubePlayer && playerReady) {
+                        youtubePlayer.loadVideoById(videoId);
+                        youtubePlayer.playVideo();
+                    }
+                }
+                
+                setTimeout(() => {
+                    const videoContainer = document.getElementById('video-container');
+                    if (videoContainer.requestFullscreen) {
+                        videoContainer.requestFullscreen().catch(err => {
+                            console.log('Fullscreen request failed:', err);
+                        });
+                    } else if (videoContainer.webkitRequestFullscreen) {
+                        videoContainer.webkitRequestFullscreen();
+                    }
+                }, 800);
+            } else {
+                if (youtubePlayer && playerReady) {
+                    youtubePlayer.stopVideo();
+                }
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+
+        window.addEventListener('load', () => {
+            const titleImg = document.querySelector('#screen-title img');
+            if (titleImg) {
+                titleImg.focus();
+            }
+        });
+    <\/script>
+</body>
+</html>`;
+        }
+
+        function previewApp() {
+            alert('Preview not yet implemented. Download the file to test your app!');
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all fields?')) {
+                document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+                document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+                document.querySelectorAll('.image-preview').forEach(preview => preview.textContent = 'No image');
+                Object.keys(window).forEach(key => {
+                    if (key.endsWith('_dataUrl')) {
+                        delete window[key];
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>`;
