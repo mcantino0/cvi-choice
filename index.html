@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVI Choice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none !important;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .screen.active {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .title-screen {
+            text-align: center;
+        }
+
+        .title-screen img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .title-screen img:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .choices-screen {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+
+        .screen.active.choices-screen {
+            flex-direction: row;
+        }
+
+        .choice-button {
+            background: none;
+            border: 3px solid transparent;
+            cursor: pointer;
+            padding: 10px;
+            transition: all 0.2s;
+        }
+
+        .choice-button img {
+            max-width: 300px;
+            height: auto;
+            display: block;
+        }
+
+        .choice-button:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .choice-button:active {
+            transform: scale(0.95);
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 0, 0.3);
+            color: #ffff00;
+            border: 2px solid #ffff00;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .back-button:focus {
+            outline: none;
+            background-color: #ffff00;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Screen -->
+    <div class="screen title-screen active" id="screen-title">
+        <img src="My Apps Title.png" alt="My Apps Title - Press Enter to continue" tabindex="0">
+    </div>
+
+    <!-- Screen 1: Picture1 or Next -->
+    <div class="screen choices-screen" id="screen-1">
+        <button class="choice-button" aria-label="Picture 1 - Opens YouTube video">
+            <img src="Picture1.png" alt="Picture 1">
+        </button>
+        <button class="choice-button next-button" aria-label="Next - Go to next set of options">
+            <img src="next.png" alt="Next">
+        </button>
+    </div>
+
+    <!-- Screen 2: Picture2 or Next -->
+    <div class="screen choices-screen" id="screen-2">
+        <button class="choice-button" aria-label="Picture 2 - Opens YouTube video">
+            <img src="Picture2.png" alt="Picture 2">
+        </button>
+        <button class="choice-button next-button" aria-label="Next - Go to next set of options">
+            <img src="next.png" alt="Next">
+        </button>
+    </div>
+
+    <!-- Screen 3: Picture3 or Next -->
+    <div class="screen choices-screen" id="screen-3">
+        <button class="choice-button" aria-label="Picture 3 - Opens YouTube video">
+            <img src="Picture3.png" alt="Picture 3">
+        </button>
+        <button class="choice-button next-button" aria-label="Next - Go to next set of options">
+            <img src="next.png" alt="Next">
+        </button>
+    </div>
+
+    <!-- Screen 4: Picture4 or Back to Start -->
+    <div class="screen choices-screen" id="screen-4">
+        <button class="choice-button" aria-label="Picture 4 - Opens YouTube video">
+            <img src="Picture4.png" alt="Picture 4">
+        </button>
+        <button class="choice-button next-button" aria-label="Back - Return to title screen">
+            <img src="next.png" alt="Back">
+        </button>
+    </div>
+
+    <!-- Video Player Screen -->
+    <div class="screen" id="screen-video">
+        <button class="back-button" aria-label="Close video and go back">Close Video (Esc)</button>
+        <div class="video-container">
+            <iframe id="video-player" 
+                    src="https://www.youtube.com/embed/O610FzBWs5A?autoplay=1&fs=1" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 'title';
+        let previousScreen = 'screen-1'; // Track which screen to return to from video
+        const screens = {
+            'title': document.getElementById('screen-title'),
+            'screen-1': document.getElementById('screen-1'),
+            'screen-2': document.getElementById('screen-2'),
+            'screen-3': document.getElementById('screen-3'),
+            'screen-4': document.getElementById('screen-4'),
+            'video': document.getElementById('screen-video')
+        };
+
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            screens[screenName].classList.add('active');
+            
+            // Track previous screen for returning from video
+            if (screenName === 'video') {
+                previousScreen = currentScreen;
+            }
+            
+            currentScreen = screenName;
+            
+            // Focus the first focusable element on the new screen
+            setTimeout(() => {
+                const focusableElements = screens[screenName].querySelectorAll('button, img[tabindex], [tabindex="0"]');
+                if (focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            }, 100);
+        }
+
+        // Title screen handling
+        const titleImg = document.querySelector('#screen-title img');
+        titleImg.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                showScreen('screen-1');
+            }
+        });
+
+        // Set up choice buttons for each screen
+        const screenChoices = [
+            { screenId: 'screen-1', nextScreen: 'screen-2' },
+            { screenId: 'screen-2', nextScreen: 'screen-3' },
+            { screenId: 'screen-3', nextScreen: 'screen-4' },
+            { screenId: 'screen-4', nextScreen: 'title' }
+        ];
+
+        screenChoices.forEach(({ screenId, nextScreen }) => {
+            const screen = document.getElementById(screenId);
+            const buttons = screen.querySelectorAll('.choice-button');
+            
+            buttons.forEach((button, index) => {
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (button.classList.contains('next-button')) {
+                            showScreen(nextScreen);
+                        } else {
+                            showScreen('video');
+                        }
+                    }
+                });
+
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (button.classList.contains('next-button')) {
+                        showScreen(nextScreen);
+                    } else {
+                        showScreen('video');
+                    }
+                });
+            });
+        });
+
+        // Video screen handling
+        const backButton = document.querySelector('.back-button');
+        backButton.addEventListener('click', () => {
+            showScreen(previousScreen);
+        });
+
+        backButton.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                showScreen(previousScreen);
+            }
+        });
+
+        // Close video with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentScreen === 'video') {
+                showScreen(previousScreen);
+            }
+        });
+    </script>
+</body>
+</html>
