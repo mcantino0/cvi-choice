@@ -204,6 +204,68 @@
             margin-bottom: 15px;
             font-size: 13px;
         }
+
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .preview-content {
+            background-color: #1a1a1a;
+            border: 2px solid #ffff00;
+            border-radius: 8px;
+            width: 90%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+        }
+
+        .preview-header {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-bottom: 2px solid #ffff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-header h2 {
+            margin: 0;
+            color: #ffff00;
+        }
+
+        .close-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .preview-iframe {
+            flex: 1;
+            border: none;
+            background-color: #000;
+        }
     </style>
 </head>
 <body>
@@ -226,7 +288,7 @@
             <div class="section">
                 <h2>Choice 1</h2>
                 <div class="form-group">
-                    <label for="choice1-image">Upload Image:</label>
+                    <label for="choice1-image">Upload Choice Image:</label>
                     <input type="file" id="choice1-image" accept="image/*">
                     <div class="image-preview" id="choice1-preview">No image</div>
                 </div>
@@ -235,12 +297,18 @@
                     <input type="text" id="choice1-youtube" placeholder="e.g., dQw4w9WgXcQ">
                     <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
                 </div>
+                <div class="form-group">
+                    <label for="choice1-next">Upload Next/Skip Image:</label>
+                    <input type="file" id="choice1-next" accept="image/*">
+                    <div class="image-preview" id="choice1-next-preview">No image</div>
+                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                </div>
             </div>
 
             <div class="section">
                 <h2>Choice 2</h2>
                 <div class="form-group">
-                    <label for="choice2-image">Upload Image:</label>
+                    <label for="choice2-image">Upload Choice Image:</label>
                     <input type="file" id="choice2-image" accept="image/*">
                     <div class="image-preview" id="choice2-preview">No image</div>
                 </div>
@@ -249,12 +317,18 @@
                     <input type="text" id="choice2-youtube" placeholder="e.g., dQw4w9WgXcQ">
                     <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
                 </div>
+                <div class="form-group">
+                    <label for="choice2-next">Upload Next/Skip Image:</label>
+                    <input type="file" id="choice2-next" accept="image/*">
+                    <div class="image-preview" id="choice2-next-preview">No image</div>
+                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                </div>
             </div>
 
             <div class="section">
                 <h2>Choice 3</h2>
                 <div class="form-group">
-                    <label for="choice3-image">Upload Image:</label>
+                    <label for="choice3-image">Upload Choice Image:</label>
                     <input type="file" id="choice3-image" accept="image/*">
                     <div class="image-preview" id="choice3-preview">No image</div>
                 </div>
@@ -263,12 +337,18 @@
                     <input type="text" id="choice3-youtube" placeholder="e.g., dQw4w9WgXcQ">
                     <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
                 </div>
+                <div class="form-group">
+                    <label for="choice3-next">Upload Next/Skip Image:</label>
+                    <input type="file" id="choice3-next" accept="image/*">
+                    <div class="image-preview" id="choice3-next-preview">No image</div>
+                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                </div>
             </div>
 
             <div class="section">
                 <h2>Choice 4</h2>
                 <div class="form-group">
-                    <label for="choice4-image">Upload Image:</label>
+                    <label for="choice4-image">Upload Choice Image:</label>
                     <input type="file" id="choice4-image" accept="image/*">
                     <div class="image-preview" id="choice4-preview">No image</div>
                 </div>
@@ -276,6 +356,12 @@
                     <label for="choice4-youtube">YouTube Video ID:</label>
                     <input type="text" id="choice4-youtube" placeholder="e.g., dQw4w9WgXcQ">
                     <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                </div>
+                <div class="form-group">
+                    <label for="choice4-next">Upload Next/Skip Image:</label>
+                    <input type="file" id="choice4-next" accept="image/*">
+                    <div class="image-preview" id="choice4-next-preview">No image</div>
+                    <p class="help-text">This button lets users skip to the next choice screen</p>
                 </div>
             </div>
 
@@ -285,6 +371,17 @@
                 <button onclick="previewApp()">👁️ Preview App</button>
                 <button onclick="resetForm()">🔄 Reset</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>App Preview</h2>
+                <button class="close-btn" onclick="closePreview()">Close Preview</button>
+            </div>
+            <iframe class="preview-iframe" id="preview-iframe"></iframe>
         </div>
     </div>
 
@@ -309,9 +406,13 @@
         // Setup all image previews
         setupImagePreview('title-image', 'title-preview');
         setupImagePreview('choice1-image', 'choice1-preview');
+        setupImagePreview('choice1-next', 'choice1-next-preview');
         setupImagePreview('choice2-image', 'choice2-preview');
+        setupImagePreview('choice2-next', 'choice2-next-preview');
         setupImagePreview('choice3-image', 'choice3-preview');
+        setupImagePreview('choice3-next', 'choice3-next-preview');
         setupImagePreview('choice4-image', 'choice4-preview');
+        setupImagePreview('choice4-next', 'choice4-next-preview');
 
         function getVideoId(input) {
             return document.getElementById(input).value.trim();
@@ -364,10 +465,10 @@
         function generateHTML() {
             const titleImg = getImageDataUrl('title-image');
             const choices = [
-                { img: getImageDataUrl('choice1-image'), id: getVideoId('choice1-youtube') },
-                { img: getImageDataUrl('choice2-image'), id: getVideoId('choice2-youtube') },
-                { img: getImageDataUrl('choice3-image'), id: getVideoId('choice3-youtube') },
-                { img: getImageDataUrl('choice4-image'), id: getVideoId('choice4-youtube') }
+                { img: getImageDataUrl('choice1-image'), next: getImageDataUrl('choice1-next'), id: getVideoId('choice1-youtube') },
+                { img: getImageDataUrl('choice2-image'), next: getImageDataUrl('choice2-next'), id: getVideoId('choice2-youtube') },
+                { img: getImageDataUrl('choice3-image'), next: getImageDataUrl('choice3-next'), id: getVideoId('choice3-youtube') },
+                { img: getImageDataUrl('choice4-image'), next: getImageDataUrl('choice4-next'), id: getVideoId('choice4-youtube') }
             ].filter(choice => choice.img); // Only include choices with images
 
             let choiceScreensHTML = '';
@@ -376,6 +477,7 @@
             choices.forEach((choice, index) => {
                 const screenId = `screen-${index + 1}`;
                 const nextScreen = index < choices.length - 1 ? `screen-${index + 2}` : 'title';
+                const nextButtonImg = choice.next || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cpolygon points="30,20 70,50 30,80" fill="%23ffff00"/%3E%3C/svg%3E';
 
                 choiceScreensHTML += `
     <!-- Screen ${index + 1}: Picture${index + 1} or Next -->
@@ -384,7 +486,7 @@
             <img src="${choice.img}" alt="Picture ${index + 1}">
         </button>
         <button class="choice-button next-button" aria-label="Next - Go to next set of options">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='30,20 70,50 30,80' fill='%23ffff00'/%3E%3C/svg%3E" alt="Next">
+            <img src="${nextButtonImg}" alt="Next">
         </button>
     </div>`;
 
@@ -677,18 +779,26 @@ ${choiceScreensHTML}
             originalShowScreen(screenName);
             
             if (screenName === 'video') {
-                const choiceData = screenChoices.find(c => previousScreen && previousScreen.includes(c.screenId.split('-')[1]));
-                const videoId = choiceData ? choiceData.youtubeId : 'O610FzBWs5A';
+                // Find the video ID for this choice
+                let videoIdToPlay = 'O610FzBWs5A';
+                for (let choice of screenChoices) {
+                    if (previousScreen === choice.screenId) {
+                        videoIdToPlay = choice.youtubeId;
+                        break;
+                    }
+                }
                 
                 if (youtubePlayer && playerReady) {
-                    youtubePlayer.loadVideoById(videoId);
+                    youtubePlayer.loadVideoById(videoIdToPlay);
                     youtubePlayer.playVideo();
                 } else {
                     initializeYouTubePlayer();
-                    if (youtubePlayer && playerReady) {
-                        youtubePlayer.loadVideoById(videoId);
-                        youtubePlayer.playVideo();
-                    }
+                    setTimeout(() => {
+                        if (youtubePlayer && playerReady) {
+                            youtubePlayer.loadVideoById(videoIdToPlay);
+                            youtubePlayer.playVideo();
+                        }
+                    }, 100);
                 }
                 
                 setTimeout(() => {
@@ -723,7 +833,40 @@ ${choiceScreensHTML}
         }
 
         function previewApp() {
-            alert('Preview not yet implemented. Download the file to test your app!');
+            // Validate inputs
+            if (!getImageDataUrl('title-image')) {
+                alert('Please upload a title image');
+                return;
+            }
+
+            const choiceCount = ['choice1-image', 'choice2-image', 'choice3-image', 'choice4-image']
+                .filter(id => getImageDataUrl(id)).length;
+            
+            if (choiceCount === 0) {
+                alert('Please upload at least one choice image');
+                return;
+            }
+
+            const youtubeCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
+                .filter(id => getVideoId(id)).length;
+            
+            if (youtubeCount === 0) {
+                alert('Please enter at least one YouTube video ID');
+                return;
+            }
+
+            // Generate HTML and show in iframe
+            const htmlContent = generateHTML();
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            document.getElementById('preview-iframe').src = url;
+            document.getElementById('preview-modal').classList.add('active');
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.remove('active');
+            document.getElementById('preview-iframe').src = '';
         }
 
         function resetForm() {
