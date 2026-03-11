@@ -170,10 +170,14 @@
     <!-- Video Player Screen -->
     <div class="screen" id="screen-video">
         <button class="back-button" aria-label="Close video and go back">Close Video (Esc)</button>
-        <div class="video-container">
+        <div class="video-container" id="video-container">
             <iframe id="video-player" 
-                    src="https://www.youtube.com/embed/O610FzBWs5A?autoplay=1&fs=1" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+                    width="100%"
+                    height="100%"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
                     allowfullscreen>
             </iframe>
         </div>
@@ -274,6 +278,36 @@
                 showScreen(previousScreen);
             }
         });
+
+        // Override showScreen to handle video fullscreen
+        const originalShowScreen = showScreen;
+        showScreen = function(screenName) {
+            originalShowScreen(screenName);
+            
+            if (screenName === 'video') {
+                const videoPlayer = document.getElementById('video-player');
+                const videoUrl = 'https://www.youtube.com/embed/O610FzBWs5A?si=z-3eQdX0yqvJxeIM&autoplay=1';
+                videoPlayer.setAttribute('src', videoUrl);
+                
+                // Request fullscreen after video loads
+                setTimeout(() => {
+                    const videoContainer = document.getElementById('video-container');
+                    if (videoContainer.requestFullscreen) {
+                        videoContainer.requestFullscreen().catch(err => {
+                            console.log('Fullscreen request failed:', err);
+                        });
+                    } else if (videoContainer.webkitRequestFullscreen) {
+                        videoContainer.webkitRequestFullscreen();
+                    }
+                }, 800);
+            } else {
+                const videoPlayer = document.getElementById('video-player');
+                videoPlayer.src = '';
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+        };
     </script>
 </body>
 </html>
