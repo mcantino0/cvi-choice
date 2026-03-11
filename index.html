@@ -180,6 +180,7 @@
         let currentScreen = 'title';
         let previousScreen = 'screen-1'; // Track which screen to return to from video
         let youtubePlayer = null; // YouTube API player instance
+        let playerReady = false;
         const screens = {
             'title': document.getElementById('screen-title'),
             'screen-1': document.getElementById('screen-1'),
@@ -189,22 +190,35 @@
             'video': document.getElementById('screen-video')
         };
 
+        // Initialize YouTube player once API is ready
+        function initializeYouTubePlayer() {
+            if (typeof YT !== 'undefined' && YT.Player && !playerReady) {
+                youtubePlayer = new YT.Player('video-player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: 'O610FzBWs5A',
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    },
+                    playerVars: {
+                        'autoplay': 1,
+                        'fs': 1,
+                        'modestbranding': 1
+                    }
+                });
+                playerReady = true;
+            }
+        }
+
         // YouTube API callback - called when YouTube API is ready
         window.onYouTubeIframeAPIReady = function() {
-            youtubePlayer = new YT.Player('video-player', {
-                height: '100%',
-                width: '100%',
-                videoId: 'O610FzBWs5A',
-                events: {
-                    'onStateChange': onPlayerStateChange
-                },
-                playerVars: {
-                    'autoplay': 1,
-                    'fs': 1,
-                    'modestbranding': 1
-                }
-            });
+            initializeYouTubePlayer();
         };
+
+        // Fallback: initialize player if API loads after script execution
+        window.addEventListener('load', function() {
+            setTimeout(initializeYouTubePlayer, 500);
+        });
 
         // Handle video state changes
         function onPlayerStateChange(event) {
@@ -318,9 +332,16 @@
             
             if (screenName === 'video') {
                 // Load and play video using YouTube API
-                if (youtubePlayer) {
+                if (youtubePlayer && playerReady) {
                     youtubePlayer.loadVideoById('O610FzBWs5A');
                     youtubePlayer.playVideo();
+                } else {
+                    // If player isn't ready yet, try to initialize it
+                    initializeYouTubePlayer();
+                    if (youtubePlayer && playerReady) {
+                        youtubePlayer.loadVideoById('O610FzBWs5A');
+                        youtubePlayer.playVideo();
+                    }
                 }
                 
                 // Request fullscreen after video loads
@@ -336,7 +357,7 @@
                 }, 800);
             } else {
                 // Stop the video and exit fullscreen
-                if (youtubePlayer) {
+                if (youtubePlayer && playerReady) {
                     youtubePlayer.stopVideo();
                 }
                 if (document.fullscreenElement) {
