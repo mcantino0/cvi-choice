@@ -303,6 +303,14 @@
             }
         });
 
+        // Auto-focus the title image when page loads
+        window.addEventListener('load', () => {
+            const titleImg = document.querySelector('#screen-title img');
+            if (titleImg) {
+                titleImg.focus();
+            }
+        });
+
         // Override showScreen to handle video fullscreen
         const originalShowScreen = showScreen;
         showScreen = function(screenName) {
