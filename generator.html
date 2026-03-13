@@ -654,7 +654,7 @@ ${choiceScreensHTML}
             'video': document.getElementById('screen-video')
         };
 
-        const screenChoices = ${screenChoicesArray};
+        const screenChoices = JSON.parse('${screenChoicesArray}');
 
         function initializeYouTubePlayer() {
             if (typeof YT !== 'undefined' && YT.Player && !playerReady) {
