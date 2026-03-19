@@ -489,7 +489,7 @@
             <img src="${choice.img}" alt="Picture ${index + 1}">
         </button>
         <button class="choice-button next-button" aria-label="Next - Go to next set of options">
-            <img src="${nextButtonImg}" alt="Next">
+            ${nextButtonImg ? `<img src="${nextButtonImg}" alt="Next">` : 'Next'}
         </button>
     </div>`;
 
@@ -793,7 +793,7 @@ ${choiceScreensHTML}
             
             buttons.forEach((button, index) => {
                 button.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         if (button.classList.contains('next-button')) {
                             showScreen(nextScreen);
@@ -806,8 +806,10 @@ ${choiceScreensHTML}
                 button.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (button.classList.contains('next-button')) {
+                        console.debug('Next clicked on', screenId, '->', nextScreen);
                         showScreen(nextScreen);
                     } else {
+                        console.debug('Choice clicked on', screenId, 'videoUrl=', videoUrl);
                         showScreen('video');
                     }
                 });
