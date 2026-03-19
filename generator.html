@@ -475,10 +475,12 @@
             let choiceScreensHTML = '';
             let screenChoicesJS = [];
 
+            const defaultNextImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0gaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcgdmlld0JveD0wIDAgMjQgMjQ+PHBhdGggZmlsbD0jZmZmZjAwIGQ9TTggNWw4IDctOCA3ei8+PC9zdmc+';
+
             choices.forEach((choice, index) => {
                 const screenId = `screen-${index + 1}`;
                 const nextScreen = index < choices.length - 1 ? `screen-${index + 2}` : 'title';
-                const nextButtonImg = choice.next || 'next.png';
+                const nextButtonImg = choice.next || defaultNextImage;
 
                 choiceScreensHTML += `
     <!-- Screen ${index + 1}: Picture${index + 1} or Next -->
