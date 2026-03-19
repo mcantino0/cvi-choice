@@ -626,7 +626,7 @@
 <body>
     <!-- Title Screen -->
     <div class="screen title-screen active" id="screen-title">
-        <img src="${titleImg}" alt="Title - Press Enter to continue" tabindex="0">
+        <img src="${titleImg}" alt="Title - Press Enter to continue" tabindex="0" role="button">
     </div>
 
 ${choiceScreensHTML}
@@ -766,9 +766,15 @@ ${choiceScreensHTML}
 
         const titleImg = document.querySelector('#screen-title img');
         titleImg.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
                 showScreen('screen-1');
+            }
+        });
+
+        titleImg.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
             }
         });
 
@@ -912,10 +918,13 @@ ${choiceScreensHTML}
             const iframe = document.getElementById('preview-iframe');
             iframe.onload = () => {
                 try {
-                    const target = iframe.contentWindow.document.querySelector('#screen-title img');
+                    const frameDoc = iframe.contentWindow.document;
+                    const target = frameDoc.querySelector('#screen-title img');
                     if (target) {
                         target.setAttribute('tabindex', '0');
                         target.focus();
+                    } else {
+                        frameDoc.body.focus();
                     }
                 } catch (err) {
                     console.warn('Could not focus title image in preview iframe', err);
