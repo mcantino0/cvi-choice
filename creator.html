@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVI Choice Creator</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: Arial, sans-serif; background:#121212; color:#fff; padding:20px; }
+        .container { max-width: 1100px; margin: auto; }
+        h1,h2 { color:#ffd700; }
+        .section { background:#1e1e1e; border:1px solid #444; border-radius:8px; padding:15px; margin-bottom:15px; }
+        .form-group { margin-bottom:12px; }
+        label { display:block; font-weight:bold; margin-bottom:4px; }
+        input[type="text"], input[type="file"] { width:100%; padding:8px; border-radius:4px; border:1px solid #444; background:#252525; color:#fff; }
+        button { background:#ffd700; border:none; border-radius:5px; padding:12px 18px; color:#000; font-weight:bold; cursor:pointer; margin-right:8px; }
+        button:disabled { opacity:0.55; cursor:not-allowed; }
+        .page-actions { margin-top:20px; }
+        .note { font-size:0.9rem; color:#bbb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CVI Choice Creator</h1>
+        <p class="note">Upload a starting title image, then create 2-choice screens. First choice in each screen accepts a YouTube/Vimeo/direct video link. "next.png" is used by default for the next button if no custom image is provided.</p>
+
+        <div class="section">
+            <h2>Title Screen</h2>
+            <div class="form-group">
+                <label for="title-image">Title Image</label>
+                <input type="file" id="title-image" accept="image/*">
+            </div>
+        </div>
+
+        <div id="choice-sets"></div>
+
+        <div class="page-actions">
+            <button id="add-set">+ Add Choice Set (max 4)</button>
+            <button id="gen-page">Generate CVI Choice Page</button>
+        </div>
+
+        <div id="status" class="note"></div>
+    </div>
+
+    <script>
+        const MAX_SETS = 4;
+        const choiceSetsContainer = document.getElementById('choice-sets');
+        const status = document.getElementById('status');
+
+        let choicesData = [];
+
+        function createSet(setIndex) {
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.dataset.set = setIndex;
+            section.innerHTML = `
+                <h2>Choice Set ${setIndex + 1}</h2>
+                <div class="form-group"><label>First choice image</label><input type="file" class="choice-image" data-set="${setIndex}" data-choice="1" accept="image/*"></div>
+                <div class="form-group"><label>First choice video URL</label><input type="text" class="choice-video" data-set="${setIndex}" placeholder="https://www.youtube.com/watch?v=..." ></div>
+                <div class="form-group"><label>Second choice image</label><input type="file" class="choice-image" data-set="${setIndex}" data-choice="2" accept="image/*"></div>
+                <div class="form-group"><label>Custom next image (optional)</label><input type="file" class="choice-next" data-set="${setIndex}" accept="image/*"></div>
+            `;
+            return section;
+        }
+
+        function addSet() {
+            const cur = choiceSetsContainer.childElementCount;
+            if (cur >= MAX_SETS) {
+                status.textContent = 'Maximum of 4 sets reached.';
+                return;
+            }
+            const setElement = createSet(cur);
+            choiceSetsContainer.appendChild(setElement);
+            choicesData.push({ choice1:null, choice2:null, next:null, videoUrl:'' });
+            status.textContent = '';
+        }
+
+        function extractDataUrlsFromFileInput(input) {
+            return new Promise((resolve) => {
+                const file = input.files[0];
+                if (!file) return resolve('');
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function collectData() {
+            const titleInput = document.getElementById('title-image');
+            const titleUrl = await extractDataUrlsFromFileInput(titleInput);
+            if (!titleUrl) throw new Error('Please upload a title image.');
+
+            const setEls = choiceSetsContainer.querySelectorAll('.section');
+            if (!setEls.length) throw new Error('Please add at least one choice set.');
+
+            const screens = [];
+            for (const setEl of setEls) {
+                const setIndex = Number(setEl.dataset.set);
+                const choice1Input = setEl.querySelector('.choice-image[data-choice="1"]');
+                const choice2Input = setEl.querySelector('.choice-image[data-choice="2"]');
+                const nextInput = setEl.querySelector('.choice-next');
+                const videoInput = setEl.querySelector('.choice-video');
+
+                const c1 = await extractDataUrlsFromFileInput(choice1Input);
+                const c2 = await extractDataUrlsFromFileInput(choice2Input);
+                const nxt = await extractDataUrlsFromFileInput(nextInput);
+                const videoUrl = videoInput.value.trim();
+
+                if (!c1 || !c2) throw new Error('Set ' + (setIndex + 1) + ' requires both choice images.');
+                if (!videoUrl) throw new Error('Set ' + (setIndex + 1) + ' requires a video URL for first choice.');
+
+                screens.push({
+                    choice1: c1,
+                    choice2: c2,
+                    next: nxt || 'next.png',
+                    videoUrl: videoUrl
+                });
+            }
+
+            return { titleUrl, screens };
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        function generateAppHtml({ titleUrl, screens }) {
+            const screenHtml = screens.map((screen, i) => {
+                const id = 'screen-' + (i + 1);
+                const nextId = i < screens.length -1 ? 'screen-' + (i + 2) : 'title';
+                return `
+                <div class="screen choices-screen" id="${id}">
+                    <button class="choice-button" data-choice="1" aria-label="Picture ${i+1} - opens video"><img src="${screen.choice1}" alt="Picture ${i+1}"></button>
+                    <button class="choice-button" data-choice="2" data-next="${nextId}" aria-label="Next"><img src="${screen.next}" alt="Next"></button>
+                </div>`;
+            }).join('\n');
+
+            const screenChoicesJs = JSON.stringify(screens.map((screen, i) => ({ screenId: 'screen-' + (i+1), nextScreen: i < screens.length -1 ? 'screen-' + (i+2) : 'title', videoUrl: screen.videoUrl })));
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVI Choice</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial, sans-serif; background:#000; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+.screen { display:none !important; width:100%; max-width:1000px; }
+.screen.active { display:flex !important; flex-direction:column; align-items:center; justify-content:center; gap:40px; }
+.title-screen { text-align:center; }
+.title-screen img { max-width:100%; height:auto; cursor:pointer; border:3px solid transparent; }
+.title-screen img:focus, .choice-button:focus, .back-button:focus { outline:none; border-color:#ffff00; box-shadow:0 0 20px rgba(255,255,0,0.8); }
+.choices-screen{flex-direction:row; justify-content:center; align-items:center; gap:60px; flex-wrap:wrap; }
+.choice-button{background:none;border:3px solid transparent;cursor:pointer;padding:10px;transition:all 0.2s;}
+.choice-button img{max-width:300px;height:auto;display:block;}
+.choice-button:active{transform:scale(0.95);}
+.video-container{width:100%;height:100vh;display:flex;justify-content:center;align-items:center;}
+.video-container iframe, .video-container video{width:100%;height:100%;}
+.back-button{position:fixed;top:20px;left:20px;background:rgba(255,255,0,0.3);color:#ffff00;border:2px solid #ffff00;padding:10px 20px;font-size:16px;cursor:pointer;border-radius:5px;}
+</style>
+</head>
+<body>
+<div class="screen title-screen active" id="screen-title"><img src="${titleUrl}" alt="Title - Press Enter to continue" tabindex="0"></div>
+${screenHtml}
+<div class="screen" id="screen-video"><button class="back-button" aria-label="Close video and go back">Close Video (Esc)</button><div class="video-container" id="video-container"></div></div>
+<script>
+let currentScreen='title';
+let previousScreen='screen-1';
+const screens={title:document.getElementById('screen-title'),video:document.getElementById('screen-video')};
+${screens.map((s,i)=>`screens['screen-${i+1}']=document.getElementById('screen-${i+1}');`).join('\n')}
+const screenChoices=${screenChoicesJs};
+function showScreen(name){Object.values(screens).forEach(s=>s&&s.classList.remove('active'));if(screens[name])screens[name].classList.add('active');if(name==='video'){previousScreen=currentScreen;}currentScreen=name;setTimeout(()=>{const scr=screens[name];if(!scr)return;const focusables=scr.querySelectorAll('button, img[tabindex], [tabindex="0"]'); if(focusables.length)focusables[0].focus();},50);}
+function extractYouTubeId(url){if(!url)return null;const patterns=[/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,/^([a-zA-Z0-9_-]{11})$/];for(const p of patterns){const m=url.match(p);if(m&&m[1])return m[1];}return null;}
+function getVideoPlayerHTML(url){if(!url)return '';const yt=extractYouTubeId(url);if(yt)return '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/'+yt+'?autoplay=1&fs=1&modestbranding=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>';const vimeo=url.match(/vimeo\.com\/(\d+)/);if(vimeo)return '<iframe width="100%" height="100%" src="https://player.vimeo.com/video/'+vimeo[1]+'?autoplay=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>';return '<video width="100%" height="100%" controls autoplay><source src="'+url.replace(/"/g,'&quot;')+'" type="video/mp4"><source src="'+url.replace(/"/g,'&quot;')+'" type="video/webm">Your browser does not support video playback.</video>';} 
+
+document.querySelector('#screen-title img').addEventListener('click',()=>showScreen('screen-1'));
+document.querySelector('#screen-title img').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();showScreen('screen-1');}});
+
+screenChoices.forEach(({screenId,nextScreen,videoUrl})=>{const screen=document.getElementById(screenId);if(!screen)return;const buttons=screen.querySelectorAll('.choice-button');buttons.forEach(btn=>{btn.addEventListener('click',e=>{e.preventDefault(); if(btn.dataset.choice==='1') {document.getElementById('video-container').innerHTML=getVideoPlayerHTML(videoUrl); showScreen('video');} else {showScreen(nextScreen);} }); btn.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); if(btn.dataset.choice==='1'){document.getElementById('video-container').innerHTML=getVideoPlayerHTML(videoUrl); showScreen('video');} else {showScreen(nextScreen);} }});});});
+
+const backBtn=document.querySelector('.back-button');backBtn.addEventListener('click',()=>showScreen(previousScreen));backBtn.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();showScreen(previousScreen);}});
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape' && currentScreen==='video'){showScreen(previousScreen);}});
+
+window.addEventListener('load',()=>{const t=document.querySelector('#screen-title img');if(t){t.focus();}});
+</script>
+</body>
+</html>`;
+        }
+
+        async function buildPage() {
+            status.textContent = '';
+            try {
+                const data = await collectData();
+                const html = generateAppHtml(data);
+                const blob = new Blob([html], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cvi-choice-created.html';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                status.textContent = 'Download ready: cvi-choice-created.html';
+            } catch (err) {
+                status.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        document.getElementById('add-set').addEventListener('click',addSet);
+        document.getElementById('gen-page').addEventListener('click',buildPage);
+
+        addSet();
+    </script>
+</body>
+</html>
