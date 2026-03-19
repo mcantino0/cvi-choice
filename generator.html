@@ -645,6 +645,7 @@ ${choiceScreensHTML}
     <script>
         let currentScreen = 'title';
         let previousScreen = 'screen-1';
+        let videoOrigin = 'screen-1';
         let youtubePlayer = null;
         let playerReady = false;
         const screens = {
@@ -798,6 +799,7 @@ ${choiceScreensHTML}
                         if (button.classList.contains('next-button')) {
                             showScreen(nextScreen);
                         } else {
+                            videoOrigin = screenId;
                             showScreen('video');
                         }
                     }
@@ -810,6 +812,7 @@ ${choiceScreensHTML}
                         showScreen(nextScreen);
                     } else {
                         console.debug('Choice clicked on', screenId, 'videoUrl=', videoUrl);
+                        videoOrigin = screenId;
                         showScreen('video');
                     }
                 });
@@ -818,19 +821,19 @@ ${choiceScreensHTML}
 
         const backButton = document.querySelector('.back-button');
         backButton.addEventListener('click', () => {
-            showScreen(previousScreen);
+            showScreen(videoOrigin);
         });
 
         backButton.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                showScreen(previousScreen);
+                showScreen(videoOrigin);
             }
         });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && currentScreen === 'video') {
-                showScreen(previousScreen);
+                showScreen(videoOrigin);
             }
         });
 
@@ -841,7 +844,7 @@ ${choiceScreensHTML}
             if (screenName === 'video') {
                 let videoUrlToPlay = '';
                 for (let choice of screenChoices) {
-                    if (previousScreen === choice.screenId) {
+                    if (videoOrigin === choice.screenId) {
                         videoUrlToPlay = choice.videoUrl;
                         break;
                     }
