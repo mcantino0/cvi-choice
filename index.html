@@ -263,9 +263,9 @@
         // Extract YouTube video ID from URL
         function extractYouTubeId(url) {
             if (!url) return null;
-            // Handle different YouTube URL formats
+            // Handle different YouTube URL formats including you-tu.be
             const patterns = [
-                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|you-tu\.be\/)([^&\n?#]+)/,
                 /^([a-zA-Z0-9_-]{11})$/ // Just the ID
             ];
             for (let pattern of patterns) {
