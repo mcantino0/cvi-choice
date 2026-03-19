@@ -298,10 +298,10 @@
                     <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
-                    <label for="choice1-next">Upload Next/Skip Image:</label>
+                    <label for="choice1-next">Customize Next/Skip Image:</label>
                     <input type="file" id="choice1-next" accept="image/*">
                     <div class="image-preview" id="choice1-next-preview">No image</div>
-                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                    <p class="help-text">This button lets users skip to the next choice screen (default: next.png)</p>
                 </div>
             </div>
 
@@ -318,10 +318,10 @@
                     <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
-                    <label for="choice2-next">Upload Next/Skip Image:</label>
+                    <label for="choice2-next">Customize Next/Skip Image:</label>
                     <input type="file" id="choice2-next" accept="image/*">
                     <div class="image-preview" id="choice2-next-preview">No image</div>
-                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                    <p class="help-text">This button lets users skip to the next choice screen (default: next.png)</p>
                 </div>
             </div>
 
@@ -338,10 +338,10 @@
                     <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
-                    <label for="choice3-next">Upload Next/Skip Image:</label>
+                    <label for="choice3-next">Customize Next/Skip Image:</label>
                     <input type="file" id="choice3-next" accept="image/*">
                     <div class="image-preview" id="choice3-next-preview">No image</div>
-                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                    <p class="help-text">This button lets users skip to the next choice screen (default: next.png)</p>
                 </div>
             </div>
 
@@ -358,10 +358,10 @@
                     <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
-                    <label for="choice4-next">Upload Next/Skip Image:</label>
+                    <label for="choice4-next">Customize Next/Skip Image:</label>
                     <input type="file" id="choice4-next" accept="image/*">
                     <div class="image-preview" id="choice4-next-preview">No image</div>
-                    <p class="help-text">This button lets users skip to the next choice screen</p>
+                    <p class="help-text">This button lets users skip to the next choice screen (default: next.png)</p>
                 </div>
             </div>
 
@@ -477,7 +477,7 @@
             choices.forEach((choice, index) => {
                 const screenId = `screen-${index + 1}`;
                 const nextScreen = index < choices.length - 1 ? `screen-${index + 2}` : 'title';
-                const nextButtonImg = choice.next || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Cpolygon points="30,20 70,50 30,80" fill="%23ffff00"/%3E%3C/svg%3E';
+                const nextButtonImg = choice.next || 'next.png';
 
                 choiceScreensHTML += `
     <!-- Screen ${index + 1}: Picture${index + 1} or Next -->
