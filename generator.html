@@ -832,6 +832,7 @@ ${choiceScreensHTML}
         window.addEventListener('load', () => {
             const titleImg = document.querySelector('#screen-title img');
             if (titleImg) {
+                titleImg.setAttribute('tabindex', '0');
                 titleImg.focus();
             }
         });
@@ -867,8 +868,22 @@ ${choiceScreensHTML}
             const htmlContent = generateHTML();
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
-            
-            document.getElementById('preview-iframe').src = url;
+
+            const iframe = document.getElementById('preview-iframe');
+            iframe.onload = () => {
+                try {
+                    const target = iframe.contentWindow.document.querySelector('#screen-title img');
+                    if (target) {
+                        target.setAttribute('tabindex', '0');
+                        target.focus();
+                    }
+                } catch (err) {
+                    console.warn('Could not focus title image in preview iframe', err);
+                }
+                iframe.focus();
+            };
+
+            iframe.src = url;
             document.getElementById('preview-modal').classList.add('active');
         }
 
