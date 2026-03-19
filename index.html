@@ -248,6 +248,34 @@
             }, 100);
         }
 
+        // Handle Tab key to trap focus within the current screen
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                const activeScreen = screens[currentScreen];
+                const focusableElements = Array.from(activeScreen.querySelectorAll('button, img[tabindex], [tabindex="0"]'));
+                
+                if (focusableElements.length === 0) return;
+                
+                const currentFocusedElement = document.activeElement;
+                const currentIndex = focusableElements.indexOf(currentFocusedElement);
+                
+                // Tab key (forward navigation)
+                if (!e.shiftKey) {
+                    if (currentIndex === focusableElements.length - 1) {
+                        e.preventDefault();
+                        focusableElements[0].focus();
+                    }
+                }
+                // Shift+Tab key (backward navigation)
+                else {
+                    if (currentIndex === 0 || currentIndex === -1) {
+                        e.preventDefault();
+                        focusableElements[focusableElements.length - 1].focus();
+                    }
+                }
+            }
+        });
+
         // Title screen handling
         const titleImg = document.querySelector('#screen-title img');
         titleImg.addEventListener('keydown', (e) => {
