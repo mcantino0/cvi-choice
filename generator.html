@@ -293,9 +293,9 @@
                     <div class="image-preview" id="choice1-preview">No image</div>
                 </div>
                 <div class="form-group">
-                    <label for="choice1-youtube">YouTube Video ID:</label>
-                    <input type="text" id="choice1-youtube" placeholder="e.g., dQw4w9WgXcQ">
-                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                    <label for="choice1-youtube">Video URL:</label>
+                    <input type="text" id="choice1-youtube" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
                     <label for="choice1-next">Upload Next/Skip Image:</label>
@@ -313,9 +313,9 @@
                     <div class="image-preview" id="choice2-preview">No image</div>
                 </div>
                 <div class="form-group">
-                    <label for="choice2-youtube">YouTube Video ID:</label>
-                    <input type="text" id="choice2-youtube" placeholder="e.g., dQw4w9WgXcQ">
-                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                    <label for="choice2-youtube">Video URL:</label>
+                    <input type="text" id="choice2-youtube" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
                     <label for="choice2-next">Upload Next/Skip Image:</label>
@@ -333,9 +333,9 @@
                     <div class="image-preview" id="choice3-preview">No image</div>
                 </div>
                 <div class="form-group">
-                    <label for="choice3-youtube">YouTube Video ID:</label>
-                    <input type="text" id="choice3-youtube" placeholder="e.g., dQw4w9WgXcQ">
-                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                    <label for="choice3-youtube">Video URL:</label>
+                    <input type="text" id="choice3-youtube" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
                     <label for="choice3-next">Upload Next/Skip Image:</label>
@@ -353,9 +353,9 @@
                     <div class="image-preview" id="choice4-preview">No image</div>
                 </div>
                 <div class="form-group">
-                    <label for="choice4-youtube">YouTube Video ID:</label>
-                    <input type="text" id="choice4-youtube" placeholder="e.g., dQw4w9WgXcQ">
-                    <p class="help-text">Find the ID in the URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></p>
+                    <label for="choice4-youtube">Video URL:</label>
+                    <input type="text" id="choice4-youtube" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    <p class="help-text">Supports: YouTube URLs, Vimeo, or direct video file URLs</p>
                 </div>
                 <div class="form-group">
                     <label for="choice4-next">Upload Next/Skip Image:</label>
@@ -414,7 +414,7 @@
         setupImagePreview('choice4-image', 'choice4-preview');
         setupImagePreview('choice4-next', 'choice4-next-preview');
 
-        function getVideoId(input) {
+        function getVideoUrl(input) {
             return document.getElementById(input).value.trim();
         }
 
@@ -437,11 +437,11 @@
                 return;
             }
 
-            const youtubeCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
-                .filter(id => getVideoId(id)).length;
+            const videoCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
+                .filter(id => getVideoUrl(id)).length;
             
-            if (youtubeCount === 0) {
-                alert('Please enter at least one YouTube video ID');
+            if (videoCount === 0) {
+                alert('Please enter at least one video URL');
                 return;
             }
 
@@ -465,10 +465,10 @@
         function generateHTML() {
             const titleImg = getImageDataUrl('title-image');
             const choices = [
-                { img: getImageDataUrl('choice1-image'), next: getImageDataUrl('choice1-next'), id: getVideoId('choice1-youtube') },
-                { img: getImageDataUrl('choice2-image'), next: getImageDataUrl('choice2-next'), id: getVideoId('choice2-youtube') },
-                { img: getImageDataUrl('choice3-image'), next: getImageDataUrl('choice3-next'), id: getVideoId('choice3-youtube') },
-                { img: getImageDataUrl('choice4-image'), next: getImageDataUrl('choice4-next'), id: getVideoId('choice4-youtube') }
+                { img: getImageDataUrl('choice1-image'), next: getImageDataUrl('choice1-next'), url: getVideoUrl('choice1-youtube') },
+                { img: getImageDataUrl('choice2-image'), next: getImageDataUrl('choice2-next'), url: getVideoUrl('choice2-youtube') },
+                { img: getImageDataUrl('choice3-image'), next: getImageDataUrl('choice3-next'), url: getVideoUrl('choice3-youtube') },
+                { img: getImageDataUrl('choice4-image'), next: getImageDataUrl('choice4-next'), url: getVideoUrl('choice4-youtube') }
             ].filter(choice => choice.img); // Only include choices with images
 
             let choiceScreensHTML = '';
@@ -493,7 +493,7 @@
                 screenChoicesJS.push({
                     screenId,
                     nextScreen,
-                    youtubeId: choice.id
+                    videoUrl: choice.url
                 });
             });
 
@@ -642,8 +642,6 @@ ${choiceScreensHTML}
     <script>
         let currentScreen = 'title';
         let previousScreen = 'screen-1';
-        let youtubePlayer = null;
-        let playerReady = false;
         const screens = {
             'title': document.getElementById('screen-title'),
             'screen-1': document.getElementById('screen-1'),
@@ -656,37 +654,30 @@ ${choiceScreensHTML}
 
         const screenChoices = JSON.parse('${screenChoicesArray}');
 
-        function initializeYouTubePlayer() {
-            if (typeof YT !== 'undefined' && YT.Player && !playerReady) {
-                youtubePlayer = new YT.Player('video-player', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: 'O610FzBWs5A',
-                    events: {
-                        'onStateChange': onPlayerStateChange
-                    },
-                    playerVars: {
-                        'autoplay': 1,
-                        'fs': 1,
-                        'modestbranding': 1
-                    }
-                });
-                playerReady = true;
+        function extractYouTubeId(url) {
+            if (!url) return null;
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+                /^([a-zA-Z0-9_-]{11})$/
+            ];
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) return match[1];
             }
+            return null;
         }
 
-        window.onYouTubeIframeAPIReady = function() {
-            initializeYouTubePlayer();
-        };
-
-        window.addEventListener('load', function() {
-            setTimeout(initializeYouTubePlayer, 500);
-        });
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                showScreen('title');
+        function getVideoPlayerHTML(videoUrl) {
+            if (!videoUrl) return '';
+            const youtubeId = extractYouTubeId(videoUrl);
+            if (youtubeId) {
+                return '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&fs=1&modestbranding=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>';
             }
+            const vimeoMatch = videoUrl.match(/vimeo\\.com\\/(\\d+)/);
+            if (vimeoMatch) {
+                return '<iframe width="100%" height="100%" src="https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>';
+            }
+            return '<video width="100%" height="100%" controls autoplay><source src="' + videoUrl.replace(/"/g, '&quot;') + '" type="video/mp4"><source src="' + videoUrl.replace(/"/g, '&quot;') + '" type="video/webm">Your browser does not support video playback.</video>';
         }
 
         function showScreen(screenName) {
@@ -727,7 +718,7 @@ ${choiceScreensHTML}
             showScreen('screen-1');
         });
 
-        screenChoices.forEach(({ screenId, nextScreen, youtubeId }) => {
+        screenChoices.forEach(({ screenId, nextScreen, videoUrl }) => {
             const screen = document.getElementById(screenId);
             if (!screen) return;
             
@@ -779,30 +770,21 @@ ${choiceScreensHTML}
             originalShowScreen(screenName);
             
             if (screenName === 'video') {
-                // Find the video ID for this choice
-                let videoIdToPlay = 'O610FzBWs5A';
+                // Find the video URL for this choice
+                let videoUrlToPlay = '';
                 for (let choice of screenChoices) {
                     if (previousScreen === choice.screenId) {
-                        videoIdToPlay = choice.youtubeId;
+                        videoUrlToPlay = choice.videoUrl;
                         break;
                     }
                 }
                 
-                if (youtubePlayer && playerReady) {
-                    youtubePlayer.loadVideoById(videoIdToPlay);
-                    youtubePlayer.playVideo();
-                } else {
-                    initializeYouTubePlayer();
-                    setTimeout(() => {
-                        if (youtubePlayer && playerReady) {
-                            youtubePlayer.loadVideoById(videoIdToPlay);
-                            youtubePlayer.playVideo();
-                        }
-                    }, 100);
-                }
+                // Load the appropriate video player
+                const videoContainer = document.getElementById('video-container');
+                videoContainer.innerHTML = getVideoPlayerHTML(videoUrlToPlay);
                 
+                // Request fullscreen after video loads
                 setTimeout(() => {
-                    const videoContainer = document.getElementById('video-container');
                     if (videoContainer.requestFullscreen) {
                         videoContainer.requestFullscreen().catch(err => {
                             console.log('Fullscreen request failed:', err);
@@ -812,9 +794,9 @@ ${choiceScreensHTML}
                     }
                 }, 800);
             } else {
-                if (youtubePlayer && playerReady) {
-                    youtubePlayer.stopVideo();
-                }
+                // Clean up video container when leaving video screen
+                const videoContainer = document.getElementById('video-container');
+                videoContainer.innerHTML = '';
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 }
@@ -847,11 +829,11 @@ ${choiceScreensHTML}
                 return;
             }
 
-            const youtubeCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
-                .filter(id => getVideoId(id)).length;
+            const videoCount = ['choice1-youtube', 'choice2-youtube', 'choice3-youtube', 'choice4-youtube']
+                .filter(id => getVideoUrl(id)).length;
             
-            if (youtubeCount === 0) {
-                alert('Please enter at least one YouTube video ID');
+            if (videoCount === 0) {
+                alert('Please enter at least one video URL');
                 return;
             }
 

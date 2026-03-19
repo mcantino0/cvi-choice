@@ -175,12 +175,9 @@
         </div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let currentScreen = 'title';
         let previousScreen = 'screen-1'; // Track which screen to return to from video
-        let youtubePlayer = null; // YouTube API player instance
-        let playerReady = false;
         const screens = {
             'title': document.getElementById('screen-title'),
             'screen-1': document.getElementById('screen-1'),
@@ -190,43 +187,8 @@
             'video': document.getElementById('screen-video')
         };
 
-        // Initialize YouTube player once API is ready
-        function initializeYouTubePlayer() {
-            if (typeof YT !== 'undefined' && YT.Player && !playerReady) {
-                youtubePlayer = new YT.Player('video-player', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: 'O610FzBWs5A',
-                    events: {
-                        'onStateChange': onPlayerStateChange
-                    },
-                    playerVars: {
-                        'autoplay': 1,
-                        'fs': 1,
-                        'modestbranding': 1
-                    }
-                });
-                playerReady = true;
-            }
-        }
-
-        // YouTube API callback - called when YouTube API is ready
-        window.onYouTubeIframeAPIReady = function() {
-            initializeYouTubePlayer();
-        };
-
-        // Fallback: initialize player if API loads after script execution
-        window.addEventListener('load', function() {
-            setTimeout(initializeYouTubePlayer, 500);
-        });
-
-        // Handle video state changes
-        function onPlayerStateChange(event) {
-            // YT.PlayerState.ENDED = 0
-            if (event.data === YT.PlayerState.ENDED) {
-                showScreen('title');
-            }
-        }
+        // YouTube API initialization code no longer needed
+        // Videos are loaded dynamically using iframes and video tags
 
         function showScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
@@ -292,13 +254,47 @@
 
         // Set up choice buttons for each screen
         const screenChoices = [
-            { screenId: 'screen-1', nextScreen: 'screen-2' },
-            { screenId: 'screen-2', nextScreen: 'screen-3' },
-            { screenId: 'screen-3', nextScreen: 'screen-4' },
-            { screenId: 'screen-4', nextScreen: 'title' }
+            { screenId: 'screen-1', nextScreen: 'screen-2', videoUrl: 'https://www.you-tu.be/watch?v=O610FzBWs5A' },
+            { screenId: 'screen-2', nextScreen: 'screen-3', videoUrl: 'https://www.you-tu.be/watch?v=O610FzBWs5A' },
+            { screenId: 'screen-3', nextScreen: 'screen-4', videoUrl: 'https://www.you-tu.be/watch?v=O610FzBWs5A' },
+            { screenId: 'screen-4', nextScreen: 'title', videoUrl: 'https://www.you-tu.be/watch?v=O610FzBWs5A' }
         ];
 
-        screenChoices.forEach(({ screenId, nextScreen }) => {
+        // Extract YouTube video ID from URL
+        function extractYouTubeId(url) {
+            if (!url) return null;
+            // Handle different YouTube URL formats
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+                /^([a-zA-Z0-9_-]{11})$/ // Just the ID
+            ];
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) return match[1];
+            }
+            return null;
+        }
+
+        // Determine video type and build appropriate player HTML
+        function getVideoPlayerHTML(videoUrl) {
+            if (!videoUrl) return '';
+            
+            const youtubeId = extractYouTubeId(videoUrl);
+            if (youtubeId) {
+                return `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&fs=1&modestbranding=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>`;
+            }
+            
+            // Check if it's a Vimeo URL
+            const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
+            if (vimeoMatch) {
+                return `<iframe width="100%" height="100%" src="https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1" frameborder="0" allowfullscreen allow="autoplay"></iframe>`;
+            }
+            
+            // Assume it's a direct video file URL
+            return `<video width="100%" height="100%" controls autoplay><source src="${videoUrl.replace(/"/g, '&quot;')}" type="video/mp4"><source src="${videoUrl.replace(/"/g, '&quot;')}" type="video/webm">Your browser does not support video playback.</video>`;
+        }
+
+        screenChoices.forEach(({ screenId, nextScreen, videoUrl }) => {
             const screen = document.getElementById(screenId);
             const buttons = screen.querySelectorAll('.choice-button');
             
@@ -359,22 +355,21 @@
             originalShowScreen(screenName);
             
             if (screenName === 'video') {
-                // Load and play video using YouTube API
-                if (youtubePlayer && playerReady) {
-                    youtubePlayer.loadVideoById('O610FzBWs5A');
-                    youtubePlayer.playVideo();
-                } else {
-                    // If player isn't ready yet, try to initialize it
-                    initializeYouTubePlayer();
-                    if (youtubePlayer && playerReady) {
-                        youtubePlayer.loadVideoById('O610FzBWs5A');
-                        youtubePlayer.playVideo();
+                // Find the video URL for this choice
+                let videoUrlToPlay = '';
+                for (let choice of screenChoices) {
+                    if (previousScreen === choice.screenId) {
+                        videoUrlToPlay = choice.videoUrl;
+                        break;
                     }
                 }
                 
+                // Load the appropriate video player
+                const videoContainer = document.getElementById('video-container');
+                videoContainer.innerHTML = getVideoPlayerHTML(videoUrlToPlay);
+                
                 // Request fullscreen after video loads
                 setTimeout(() => {
-                    const videoContainer = document.getElementById('video-container');
                     if (videoContainer.requestFullscreen) {
                         videoContainer.requestFullscreen().catch(err => {
                             console.log('Fullscreen request failed:', err);
@@ -384,10 +379,9 @@
                     }
                 }, 800);
             } else {
-                // Stop the video and exit fullscreen
-                if (youtubePlayer && playerReady) {
-                    youtubePlayer.stopVideo();
-                }
+                // Clean up video container when leaving video screen
+                const videoContainer = document.getElementById('video-container');
+                videoContainer.innerHTML = '';
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 }
