@@ -281,14 +281,8 @@
             
             // For custom domains like you-tu.be, load directly as iframe
             if (videoUrl.includes('you-tu.be')) {
-                // Convert watch URL to embeddable format if needed
-                let embedUrl = videoUrl;
-                // Try to extract video ID and convert to embed format
-                const idMatch = videoUrl.match(/[?&]v=([^&]+)/);
-                if (idMatch && idMatch[1]) {
-                    embedUrl = 'https://www.you-tu.be/embed/' + idMatch[1];
-                }
-                return `<iframe width="100%" height="100%" src="${embedUrl}" frameborder="0" allowfullscreen allow="autoplay"></iframe>`;
+                // Load the URL directly as an iframe
+                return `<iframe width="100%" height="100%" src="${videoUrl}" frameborder="0" allowfullscreen allow="autoplay"></iframe>`;
             }
             
             // Handle standard YouTube URLs
