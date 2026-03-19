@@ -669,15 +669,9 @@ ${choiceScreensHTML}
 
         function getVideoPlayerHTML(videoUrl) {
             if (!videoUrl) return '';
-            // For custom domains like you-tu.be, load as direct video file
+            // For custom domains, load the URL directly as a video source
             if (videoUrl.includes('you-tu.be')) {
-                var idMatch = videoUrl.match(/[?&]v=([^&]+)/);
-                if (idMatch && idMatch[1]) {
-                    var videoId = idMatch[1];
-                    var videoSrc = 'https://www.you-tu.be/videos/' + videoId + '.mp4';
-                    return '<video width="100%" height="100%" controls autoplay style="width:100%;height:100%;"><source src="' + videoSrc + '" type="video/mp4">Your browser does not support video playback.</video>';
-                }
-                return '<video width="100%" height="100%" controls autoplay style="width:100%;height:100%;"><source src="' + videoUrl + '" type="video/mp4">Your browser does not support video playback.</video>';
+                return '<video width="100%" height="100%" controls autoplay><source src="' + videoUrl + '" type="video/mp4">Your browser does not support video playback.</video>';
             }
             var youtubeId = extractYouTubeId(videoUrl);
             if (youtubeId) {
