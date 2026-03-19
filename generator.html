@@ -642,6 +642,8 @@ ${choiceScreensHTML}
     <script>
         let currentScreen = 'title';
         let previousScreen = 'screen-1';
+        let youtubePlayer = null;
+        let playerReady = false;
         const screens = {
             'title': document.getElementById('screen-title'),
             'screen-1': document.getElementById('screen-1'),
@@ -652,7 +654,31 @@ ${choiceScreensHTML}
             'video': document.getElementById('screen-video')
         };
 
-        const screenChoices = JSON.parse('${screenChoicesArray}');
+        const screenChoices = ${screenChoicesArray};
+
+        // Focus-trap and keyboard nav match index.html behavior
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                const activeScreen = screens[currentScreen];
+                if (!activeScreen) return;
+                const focusableElements = Array.from(activeScreen.querySelectorAll('button, img[tabindex], [tabindex="0"]'));
+                if (focusableElements.length === 0) return;
+                const currentFocusedElement = document.activeElement;
+                const currentIndex = focusableElements.indexOf(currentFocusedElement);
+
+                if (!e.shiftKey) {
+                    if (currentIndex === focusableElements.length - 1) {
+                        e.preventDefault();
+                        focusableElements[0].focus();
+                    }
+                } else {
+                    if (currentIndex === 0 || currentIndex === -1) {
+                        e.preventDefault();
+                        focusableElements[focusableElements.length - 1].focus();
+                    }
+                }
+            }
+        });
 
         function extractYouTubeId(url) {
             if (!url) return null;
